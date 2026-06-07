@@ -65,7 +65,7 @@ Usage:
   dws chat group members remove-bot [flags]
 Example:
   dws chat group members remove-bot --id <openConversationId> --bot-id <openBotId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
   # 查询群内机器人: dws chat group bots --group <openConversationId>
 Flags:
       --id string       群聊 openConversationId (必填)
@@ -101,7 +101,7 @@ Usage:
 Example:
   dws chat group transfer-owner --group <openConversationId> --new-owner <openDingTalkId>
   dws chat group transfer-owner --group <openConversationId> --user <userId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
   # 查询人员: dws aisearch person --keyword "姓名" --dimension name
 Flags:
       --group string       群聊 openConversationId (必填)
@@ -119,7 +119,7 @@ Example:
   dws chat group invite-url --group <openConversationId>
   dws chat group invite-url --group <openConversationId> --expires-seconds 86400
   dws chat group invite-url --group <openConversationId> --expires-seconds 0
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string            群聊 openConversationId (必填)
       --expires-seconds int64   链接有效期（秒），0 表示永久有效，不传使用服务端默认值
@@ -131,7 +131,7 @@ Usage:
   dws chat group quit [flags]
 Example:
   dws chat group quit --group <openConversationId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string   群聊 openConversationId (必填)
 ```
@@ -142,7 +142,7 @@ Usage:
   dws chat group update-icon [flags]
 Example:
   dws chat group update-icon --group <openConversationId> --icon-media-id <mediaId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string          群聊 openConversationId (必填)
       --icon-media-id string  群头像 mediaId (必填)
@@ -164,7 +164,7 @@ Usage:
 Example:
   dws chat group update-settings --group <openConversationId> --setting-key searchable --status 1
   dws chat group update-settings --group <openConversationId> --setting-key onlyAdminCanAtAll --status 0
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string        群聊 openConversationId (必填)
       --setting-key string  群设置项 key (必填)
@@ -177,7 +177,7 @@ Usage:
   dws chat group bots [flags]
 Example:
   dws chat group bots --group <openConversationId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string   群聊 openConversationId (必填)
 ```
@@ -188,7 +188,7 @@ Usage:
   dws chat group dismiss [flags]
 Example:
   dws chat group dismiss --group <openConversationId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string   群聊 openConversationId (必填)
 ```
@@ -200,7 +200,7 @@ Usage:
 Example:
   dws chat group set-history --group <openConversationId> --option RECENT_100
   dws chat group set-history --group <openConversationId> --option FORBIDDEN
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
 Flags:
       --group string    群聊 openConversationId (必填)
       --option string   可见范围: FORBIDDEN | RECENT_100 | ALL (必填)
@@ -212,6 +212,8 @@ Flags:
 ```
 
 #### 拉取我创建/管理的群 — 查询当前用户作为群主或管理员的群列表
+
+> ⚠️ **可用性警告**：部分 dws v1.0.33 / 企业 MCP gateway 组合没有暴露 `chat group list-my-groups`。只有 `dws chat group --help` 明确列出该子命令时才调用；否则不要编造该命令，改用 `chat search --keyword "<群名>" --format json` 搜索目标群，或追问用户提供群名。
 
 可通过 --role 过滤角色：OWNER 仅群主、ADMIN 仅管理员，不传则返回全部。可通过 --limit 限制返回数量，不传则返回所有符合条件的群。
 ```
@@ -328,19 +330,25 @@ hasMore=true 时用返回的 nextCursor 作为下次 --cursor 继续翻页。
 Usage:
   dws chat search [flags]
 Example:
-  dws chat search --query "项目冲刺"
-  dws chat search --query "项目冲刺" --limit 20 --cursor 0
+  dws chat search --keyword "项目冲刺"
+  dws chat search --keyword "项目冲刺" --limit 20 --cursor 0
 Flags:
-      --query string   搜索关键词 (必填)
+      --keyword string   搜索关键词 (必填)
       --limit int        每页返回数量（默认 20）
       --cursor string    分页游标（默认 "0"，翻页传 nextCursor）
+
+注意:
+  - 群搜索统一使用 `--keyword`；不要优先生成旧版 `--query`
+  - 如果当前环境报 `unknown flag: --keyword`，先运行 `dws chat search --help` 查证，不要直接回退编造其它 flag
 ```
 
 ### message (会话消息管理)
 
 #### 拉取会话消息内容 — 拉取指定群聊或单聊的会话消息内容
 
-**必须显式传 `--time`**：`chat message list` 按指定时间点和方向拉取消息；不传 `--time` 时服务端可能返回空列表，不能据此判断会话没有消息。查询某个群的最近消息时，先用 `chat search --query "<群名>"` 获取 `openConversationId`，再执行 `chat message list --group <openConversationId> --time "<yyyy-MM-dd HH:mm:ss>" --limit 50 --format json`。
+**必须显式传 `--time`**：`chat message list` 按指定时间点和方向拉取消息；不传 `--time` 时服务端可能返回空列表，不能据此判断会话没有消息。查询某个群的最近消息时，先用 `chat search --keyword "<群名>" --format json` 获取 `openConversationId`，再执行 `chat message list --group <openConversationId> --time "<yyyy-MM-dd HH:mm:ss>" --limit 50 --format json`。
+
+**必须读取完整业务输出**：如果宿主返回 `businessOutputContract.requiresRecoveryBeforeFinal=true`，必须先用 recovery 读取该业务命令的完整 `stdout`（JSON 或 text）后再总结消息；不得只看 provider 截断预览、命令行摘要、help 输出或“stdout 已隐藏”的提示。
 
 --group 指定群聊，--user 指定单聊用户（通过 userId），--open-dingtalk-id 指定单聊用户（通过 openDingTalkId），三者互斥。默认拉取给定时间之后的消息，--forward=false 拉之前的。hasMore=true 时用结果中的边界 createTime 作为下次 --time 翻页。
 ```
@@ -468,7 +476,7 @@ Usage:
   dws chat message recall [flags]
 Example:
   dws chat message recall --conversation-id <openConversationId> --msg-id <openMessageId>
-  # 查询会话 ID: dws chat search --query "群名"
+  # 查询会话 ID: dws chat search --keyword "群名"
   # 消息 ID 可通过 dws chat message list 获取
 Flags:
       --conversation-id string   会话 openConversationId (必填，支持单聊/群聊，别名: --group / --id / --chat)
@@ -758,7 +766,7 @@ Example:
   dws chat message search-advanced --at-me --start "2026-04-01T00:00:00+08:00" --end "2026-04-15T00:00:00+08:00"
   dws chat message search-advanced --at-ids <openDingTalkId1>,<openDingTalkId2> --conversation-ids <openConversationId1>,<openConversationId2> --limit 50 --cursor 0
   dws chat message search-advanced --conversation-ids <单聊openConversationId> --query "合同" --start "2026-04-01T00:00:00+08:00" --end "2026-04-15T00:00:00+08:00"
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
   # 查询单聊会话 ID: dws chat conversation-info --user <userId>
   # 查询人员: dws aisearch person --keyword "姓名" --dimension name
 Flags:
@@ -780,7 +788,7 @@ Flags:
   - --user / --users 传发送者 userId
   - --sender-ids 和 --at-ids 传 openDingTalkId
   - --conversation-ids 可指定多个会话 ID（群聊或单聊均可），逗号分隔，不传则搜索所有会话
-  - 群聊 openConversationId 通过 `dws chat search --query "群名"` 获取
+  - 群聊 openConversationId 通过 `dws chat search --keyword "群名"` 获取
   - 单聊 openConversationId 通过 `dws chat conversation-info --user <userId>` 或 `--open-dingtalk-id <openDingTalkId>` 获取
   - 时间支持多种 ISO-8601 格式，如 "2026-03-10T00:00:00+08:00"、"2026-03-10 14:00:00"、"2026-03-10" 等
   - 翻页：hasMore=true 时，用返回的 nextCursor 作为下次 --cursor
@@ -812,7 +820,7 @@ Example:
   dws chat message add-emoji --conversation-id <openConversationId> --msg-id <openMsgId> --emoji "赞"
   dws chat message add-emoji --conversation-id <openConversationId> --msg-id <openMsgId> --emoji "鼓掌"
   # --emoji 的值必须是 chat-emoji-list.md 中的 name（中文名），如：赞、鼓掌、感谢、微笑 等
-  # 查询会话 ID: dws chat search --query "群名"
+  # 查询会话 ID: dws chat search --keyword "群名"
 Flags:
       --conversation-id string   会话 openConversationId (必填，支持单聊/群聊，别名: --group / --id / --chat)
       --msg-id string   消息 openMsgId (必填)
@@ -825,7 +833,7 @@ Usage:
   dws chat message remove-emoji [flags]
 Example:
   dws chat message remove-emoji --conversation-id <openConversationId> --msg-id <openMsgId> --emoji "赞"
-  # 查询会话 ID: dws chat search --query "群名"
+  # 查询会话 ID: dws chat search --keyword "群名"
 Flags:
       --conversation-id string   会话 openConversationId (必填，支持单聊/群聊，别名: --group / --id / --chat)
       --msg-id string   消息 openMsgId (必填)
@@ -1134,7 +1142,7 @@ Usage:
 Example:
   dws chat mute --conversation-id <openConversationId>
   dws chat mute --conversation-id <openConversationId> --off
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
   # 查询单聊会话 ID: dws chat conversation-info --user <userId>
 Flags:
       --conversation-id string   会话 openConversationId (必填，支持单聊/群聊)
@@ -1152,7 +1160,7 @@ Flags:
 用户说"我特别关注的人最近发了什么消息/关注的人最近聊了啥/星标联系人最近的动态" → `chat message list-focused`（零参数一行命令）
 用户说"某人发给我的消息/指定发送者的消息/某人最近的消息" → `chat message list-by-sender --sender-user-id <userId>` 或 `--sender-open-dingtalk-id <openDingTalkId>`（跨单聊+群聊）
 用户说"和某人的单聊聊天记录/拉某人单聊历史" → `chat message list --user <userId> --time "<yyyy-MM-dd HH:mm:ss>"` 或 `--open-dingtalk-id <openDingTalkId> --time "<yyyy-MM-dd HH:mm:ss>"`
-用户说"某个群的聊天记录/群聊消息/群里最近消息" → 先 `chat search --query "<群名>"` 获取 `openConversationId`，再 `chat message list --group <openConversationId> --time "<yyyy-MM-dd HH:mm:ss>" --limit 50`
+用户说"某个群的聊天记录/群聊消息/群里最近消息" → 先 `chat search --keyword "<群名>"` 获取 `openConversationId`，再 `chat message list --group <openConversationId> --time "<yyyy-MM-dd HH:mm:ss>" --limit 50`
 用户说"我最近所有消息/我今天的消息" → `chat message list-all --start <ISO> --end <ISO>`
 用户说"@我的消息/提及我的" → `chat message list-mentions --start <ISO> --end <ISO>`
 用户说"搜索消息里的关键词/包含XX的消息" → `chat message search-advanced --query "<关键词>"`（首选，严格超集）
@@ -1163,7 +1171,7 @@ Flags:
 
 用户说"建群/创建群聊" → `chat group create`
 用户说"搜索群/找群" → `chat search`
-用户说"我创建的群/我管理的群/我是群主的群/我当管理员的群" → `chat group list-my-groups`
+用户说"我创建的群/我管理的群/我是群主的群/我当管理员的群" → 先运行 `dws chat group --help`；只有 help 明确列出 `list-my-groups` 时才执行 `chat group list-my-groups`，否则追问群名或用 `chat search --keyword "<群名>" --format json` 定位目标群
 用户说"群成员/看群里有谁" → `chat group members`
 用户说"拉人进群/加群成员" → `chat group members add`
 用户说"踢人/移除群成员" → `chat group members remove`
@@ -1274,7 +1282,7 @@ openDingTalkId 为当前用户视角下的目标用户唯一标识，不可跨�
 
 ```bash
 # 1. 搜索群 — 提取 openconversation_id
-dws chat search --query "项目冲刺" --format json
+dws chat search --keyword "项目冲刺" --format json
 
 # 2. 拉取群消息
 dws chat message list --group <openconversation_id> --time "2025-03-01 00:00:00" --format json
@@ -1420,7 +1428,7 @@ Usage:
 Example:
   dws chat message send-card --group <openConversationId>
   dws chat message send-card --receiver <openDingTalkId>
-  # 查询群 ID: dws chat search --query "群名"
+  # 查询群 ID: dws chat search --keyword "群名"
   # 查询人员: dws aisearch person --keyword "姓名" --dimension name
 Flags:
       --group string      群聊 openConversationId（群聊时必填，与 --receiver 互斥）
@@ -1522,7 +1530,7 @@ Flags:
 - `chat set-top` 设置/取消会话置顶（**单聊/群聊均可**），需传 --conversation-id（openConversationId，单聊与群聊使用同一字段），默认置顶，传 --off 取消
 - `chat message reply` 以当前用户身份引用回复，与 `chat message send` 的用户身份发送语义一致
 - **如何获取 openConversationId**（如果上层已有则直接使用，不必再查）：
-  - 群聊：`dws chat search --query "群名"`
+  - 群聊：`dws chat search --keyword "群名"`
   - 单聊：`dws chat conversation-info --user <userId>` 或 `dws chat conversation-info --open-dingtalk-id <openDingTalkId>`（人员信息可通过 `dws aisearch person --keyword "姓名" --dimension name` 获取）
 - `chat group-mute` 全员禁言/取消全员禁言，需传 --group（openConversationId），默认禁言，传 --off 取消
 - `chat group-mute-member` 指定群成员禁言，需传 --group、--user/--users（userId，逗号分隔）、--mute-time（毫秒，仅禁言时必填，支持 300000/3600000/86400000/604800000/2592000000），传 --off 解除禁言

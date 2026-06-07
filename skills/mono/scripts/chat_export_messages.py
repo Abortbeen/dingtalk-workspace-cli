@@ -9,7 +9,7 @@
         --output messages.json
 
     python chat_export_messages.py \
-        --query "项目冲刺" \
+        --keyword "项目冲刺" \
         --time "2026-03-10 00:00:00" \
         --no-forward --limit 100
 """
@@ -47,7 +47,7 @@ def search_group(
 ) -> Optional[str]:
     data = run_dws([
         'chat', 'search',
-        '--query', query, '--format', 'json',
+        '--keyword', query, '--format', 'json',
     ], dry_run=dry_run)
     if dry_run:
         return '<CONV_ID>'
@@ -80,7 +80,8 @@ def main():
         description='导出群聊消息到 JSON'
     )
     parser.add_argument('--group', help='群聊 openconversation_id')
-    parser.add_argument('--query', help='按群名搜索')
+    parser.add_argument('--keyword', help='按群名搜索')
+    parser.add_argument('--query', help='按群名搜索（兼容旧脚本参数；内部仍使用 dws chat search --keyword）')
     parser.add_argument(
         '--time', required=True,
         help='起始时间 yyyy-MM-dd HH:mm:ss',
@@ -99,11 +100,12 @@ def main():
 
     conv_id = args.group
     if not conv_id:
-        if not args.query:
-            print('错误：需要 --group 或 --query 参数')
+        keyword = args.keyword or args.query
+        if not keyword:
+            print('错误：需要 --group 或 --keyword 参数')
             sys.exit(1)
-        print(f'🔍 搜索群聊: {args.query}')
-        conv_id = search_group(args.query, args.dry_run)
+        print(f'🔍 搜索群聊: {keyword}')
+        conv_id = search_group(keyword, args.dry_run)
         if not conv_id and not args.dry_run:
             sys.exit(1)
 

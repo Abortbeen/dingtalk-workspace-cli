@@ -21,6 +21,7 @@ cli_version: ">=1.0.15"
 ## 严格要求 (MUST DO)
 - DWS 命令合法性协议：执行 `dws` 前必须用当前 skill 资料确认命令；产品参考已覆盖时直接按参考执行，缺失或不确定时必须先用 `--help` 查证
 - 所有命令必须加 `--format json` 以获取可解析输出
+- 若宿主工具返回 `businessOutputContract` 且标记 `requiresRecoveryBeforeFinal=true`，必须用宿主提供的 `json`/`text` recovery 读取完整业务 `stdout` 后再回答；不得只根据 provider 可见的压缩预览、摘要、help/usage 输出或命令字符串下结论
 - 危险操作必须先向用户确认，用户同意后才加 `--yes` 执行
 - 单次批量操作不超过 30 条记录
 - 所有命令必须**严格遵循**对应产品参考文档里面规定的参数格式（如：如果有参数值，则参数和参数值之间至少用一个空格隔开）
