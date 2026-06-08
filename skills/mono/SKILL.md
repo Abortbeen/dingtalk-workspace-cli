@@ -2,6 +2,75 @@
 name: dws
 description: 管理钉钉产品能力(AI表格/AI搜问/日历/通讯录/群聊与机器人/待办/审批/考勤/日志/DING消息/开放平台文档/钉钉文档/钉钉云盘/AI听记/邮箱/在线电子表格/知识库等)。当用户需要操作表格数据、管理日程会议、模糊找人/查谁负责某事项、查询通讯录、管理群聊、机器人发消息、创建待办、提交审批、查看考勤、提交日报周报（钉钉日志模版）、读写钉钉文档、上传下载云盘文件、查询听记纪要、收发邮件、读写在线电子表格(axls)、管理钉钉知识库时使用。
 cli_version: ">=1.0.15"
+activation:
+  max_context_tokens: 6000
+  keywords:
+    - DWS
+    - dingtalk
+    - 钉钉
+    - AI搜问
+    - AI表格
+    - 考勤
+    - 日历
+    - 日程
+    - 会议室
+    - 群聊
+    - 机器人
+    - 通讯录
+    - 开放平台文档
+    - DING
+    - 钉钉文档
+    - 云文档
+    - 钉钉云盘
+    - AI听记
+    - 会议纪要
+    - OA审批
+    - 审批
+    - 日志
+    - 日报
+    - 周报
+    - 邮箱
+    - 邮件
+    - 在线电子表格
+    - axls
+    - 待办
+    - 知识库
+  patterns:
+    - "(钉钉|dingtalk|DWS).*(日历|日程|会议室|闲忙|时间建议|参会人)"
+    - "(钉钉|dingtalk|DWS).*(群聊|群消息|群成员|机器人|Webhook|@我|特别关注|发消息|撤回|转发|引用回复)"
+    - "(钉钉|dingtalk|DWS).*(AI搜问|找人|搜人|负责人|谁负责|通讯录|组织架构|部门|同事)"
+    - "(钉钉|dingtalk|DWS).*(AI表格|多维表|记录|字段|视图|图表|仪表盘|导入|导出)"
+    - "(钉钉|dingtalk|DWS).*(考勤|打卡|排班|假期|审批|请假|报销|出差|加班)"
+    - "(钉钉|dingtalk|DWS).*(文档|云文档|知识库|云盘|文件|文件夹|上传|下载|导出)"
+    - "(钉钉|dingtalk|DWS).*(听记|会议纪要|转写|摘要|思维导图|发言人)"
+    - "(钉钉|dingtalk|DWS).*(日报|周报|日志|邮箱|邮件|待办|TODO|DING|紧急消息)"
+requires:
+  bins:
+    - dws
+commands:
+  - name: cli
+    aliases: [dws]
+    executable: bin/cli
+    env:
+      - DWS_CONFIG_DIR
+      - DWS_SERVERS_URL
+      - DWS_ALLOW_HTTP_ENDPOINTS
+      - DWS_TRUSTED_DOMAINS
+      - DWS_DISABLE_KEYCHAIN
+      - DWS_KEYCHAIN_DIR
+      - DWS_CHANNEL
+      - DWS_CLIENT_ID
+      - DINGTALK_DWS_AGENTCODE
+      - HTTP_PROXY
+      - HTTPS_PROXY
+      - NO_PROXY
+    credential_env:
+      - DWS_CLIENT_SECRET
+    allow_additional_args: true
+    read_only: true
+    timeout_seconds: 300
+    max_output_bytes: 1048576
+    business_output_contract: business_cli_stdout_required
 ---
 
 # 钉钉全产品 Skill
